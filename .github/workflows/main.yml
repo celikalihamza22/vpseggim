@@ -1,4 +1,4 @@
-name: Mangoo RDP → bore.pub:25860
+name: Mangoo Debian12 RDP → bore.pub:25860
 
 on: workflow_dispatch
 
@@ -6,25 +6,34 @@ jobs:
   tunnel:
     runs-on: ubuntu-latest
     steps:
-      - name: Bore tünelini VPS'te başlat
+      - name: Debian 12 – Bore tüneli başlat
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 82.22.32.50
           username: root
-          password: Ali13481
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             pkill -f bore || true
+            
             cd /root
-            wget -q https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
-            tar xzf bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
+            
+            # Debian 12 için doğru binary (musl yerine glibc)
+            wget -q https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-gnu.tar.gz
+            
+            tar xzf bore-v0.6.0-x86_64-unknown-linux-gnu.tar.gz
+            
             chmod +x bore
+            
             nohup ./bore local 3389 --to bore.pub --port 25860 > bore.log 2>&1 &
+            
             sleep 6
+            
             echo ""
             echo "════════════════════════════════════════"
-            echo "RDP CANLI → bore.pub:25860"
-            echo "Kullanıcı   → Administrator (veya senin Windows kullanıcı adın)"
-            echo "Şifre       → Mangoo panelindeki Windows şifren"
+            echo "DEBIAN 12 RDP CANLI → bore.pub:25860"
+            echo "Kullanıcı → Administrator"
+            echo "Ali13481    → Mangoo panelindeki"
             echo "════════════════════════════════════════"
-            tail -8 bore.log
+            echo ""
+            tail -10 bore.log
