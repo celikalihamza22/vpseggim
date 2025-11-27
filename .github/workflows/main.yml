@@ -1,29 +1,26 @@
-name: Windows RDP via Bore
+name: Mangoo VPS RDP → bore.pub:25854
 
 on:
-  workflow_dispatch:    # Elle başlatmak için (buton çıkacak)
+  workflow_dispatch:
 
 jobs:
-  rdp:
-    runs-on: windows-latest    # GitHub'ın resmi Windows 2022 makinesi
+  tunnel:
+    runs-on: ubuntu-latest
     steps:
-      - name: Bore indir
+      - name: Bore indir & kur
         run: |
-          Invoke-WebRequest -Uri https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz -OutFile bore.tar.gz
-          tar -xzf bore.tar.gz
-          Move-Item bore.exe bore.exe
+          wget https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
+          tar xzf bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
+          chmod +x bore
 
-      - name: RDP aktif et & firewall aç
+      - name: Tüneli ateşle (82.22.32.50:3389 → bore.pub:25854)
         run: |
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
-
-      - name: Bore ile tünel aç (senin portun 25854)
-        run: |
-          echo "BAĞLANTI ADRESİN HAZIR: bore.pub:25854"
-          echo "Kullanıcı adı: runneradmin"
-          echo "Şifre: GitHub123!"
-          .\bore.exe local 3389 --to bore.pub --port 25854
-
-      # Buraya gelirse tünel açık kalır, GitHub 6 saate kadar canlı tutar
+          echo ""
+          echo "══════════════════════════════════"
+          echo "BAĞLANTI ADRESİ → bore.pub:25854"
+          echo "IP                  → 82.22.32.50"
+          echo "Kullanıcı          → Administrator (veya sen ne koyduysan)"
+          echo "Şifre               → Mangoo panelindeki Windows şifren"
+          echo "══════════════════════════════════"
+          echo ""
+          ./bore local 82.22.32.50:3389 --to bore.pub --port 25854
