@@ -1,31 +1,34 @@
-name: Mangoo VPS RDP → bore.pub:25854 (KESİN ÇALIŞIR)
+name: Mangoo RDP → bore.pub:25854 (KESİN ÇALIŞIR 2025)
 
 on: workflow_dispatch
 
 jobs:
-  tunnel:
+  rdp:
     runs-on: windows-latest
     steps:
-      - name: Bore Windows exe indir
+      - name: Bore Windows exe indir & çıkar
+        shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-pc-windows-msvc.zip -OutFile bore.zip
-          Expand-Archive bore.zip -DestinationPath .
-          Move-Item bore\bore.exe bore.exe
+          iwr https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-pc-windows-msvc.zip -OutFile bore.zip
+          Expand-Archive bore.zip -DestinationPath . -Force
+          Get-ChildItem -Recurse -Filter bore.exe | Select -First 1 | Move-Item -Destination bore.exe -Force
 
-      - name: nc (netcat) indir (port forward için)
+      - name: nc64.exe indir (port forward için)
+        shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://github.com/dorssel/usbipd-win/releases/download/v4.3.0/nc64.exe -OutFile nc.exe
+          iwr https://github.com/dorssel/usbipd-win/releases/download/v4.3.0/nc64.exe -OutFile nc.exe
 
-      - name: Tüneli aç (82.22.32.50:3389 → localhost:3389 → bore.pub:25854)
+      - name: Tüneli başlat
+        shell: pwsh
         run: |
-          echo ""
-          echo "══════════════════════════════════"
-          echo "BAĞLANTI ADRESİ → bore.pub:25854"
-          echo "IP              → 82.22.32.50"
-          echo "Kullanıcı       → Administrator"
-          echo "Şifre           → Mangoo panelindeki şifren"
-          echo "══════════════════════════════════"
-          echo ""
-          Start-Process -FilePath .\nc.exe -ArgumentList "82.22.32.50","3389","127.0.0.1","3389" -NoNewWindow
-          Start-Sleep -Seconds 5
+          Write-Host ""
+          Write-Host "══════════════════════════════════"
+          Write-Host "BAĞLANTI ADRESİ → bore.pub:25854"
+          Write-Host "Kullanıcı       → Administrator"
+          Write-Host "Şifre           → Mangoo panelindeki"
+          Write-Host "══════════════════════════════════"
+          Write-Host ""
+
+          Start-Process -FilePath ".\nc.exe" -ArgumentList "82.22.32.50","3389","127.0.0.1","3389" -WindowStyle Hidden
+          Start-Sleep -Seconds 6
           .\bore.exe local 3389 --to bore.pub --port 25854
