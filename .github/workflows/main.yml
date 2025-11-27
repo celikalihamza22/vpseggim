@@ -1,0 +1,29 @@
+name: Windows RDP via Bore
+
+on:
+  workflow_dispatch:    # Elle başlatmak için (buton çıkacak)
+
+jobs:
+  rdp:
+    runs-on: windows-latest    # GitHub'ın resmi Windows 2022 makinesi
+    steps:
+      - name: Bore indir
+        run: |
+          Invoke-WebRequest -Uri https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz -OutFile bore.tar.gz
+          tar -xzf bore.tar.gz
+          Move-Item bore.exe bore.exe
+
+      - name: RDP aktif et & firewall aç
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+
+      - name: Bore ile tünel aç (senin portun 25854)
+        run: |
+          echo "BAĞLANTI ADRESİN HAZIR: bore.pub:25854"
+          echo "Kullanıcı adı: runneradmin"
+          echo "Şifre: GitHub123!"
+          .\bore.exe local 3389 --to bore.pub --port 25854
+
+      # Buraya gelirse tünel açık kalır, GitHub 6 saate kadar canlı tutar
