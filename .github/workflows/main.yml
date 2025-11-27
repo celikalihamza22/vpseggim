@@ -1,26 +1,24 @@
-name: Mangoo VPS RDP → bore.pub:25854
+name: RDP bore.pub:25854 (Windows runner – %100)
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  tunnel:
-    runs-on: ubuntu-latest
+  rdp:
+    runs-on: windows-latest
     steps:
-      - name: Bore indir & kur
+      - name: Bore Windows binary indir (çalışır!)
         run: |
-          wget https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
-          tar xzf bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
-          chmod +x bore
+          Invoke-WebRequest -Uri https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-pc-windows-msvc.zip -OutFile bore.zip
+          Expand-Archive bore.zip -Force
+          Move-Item bore/bore.exe bore.exe
 
-      - name: Tüneli ateşle (82.22.32.50:3389 → bore.pub:25854)
+      - name: Tüneli aç (82.22.32.50:3389 → bore.pub:25854)
         run: |
           echo ""
           echo "══════════════════════════════════"
-          echo "BAĞLANTI ADRESİ → bore.pub:25854"
-          echo "IP                  → 82.22.32.50"
-          echo "Kullanıcı          → Administrator (veya sen ne koyduysan)"
-          echo "Şifre               → Mangoo panelindeki Windows şifren"
+          echo "BAĞLANTI ADRESİ: bore.pub:25854"
+          echo "Kullanıcı: Administrator"
+          echo "Şifre: Mangoo panelindeki şifren"
           echo "══════════════════════════════════"
           echo ""
-          ./bore local 82.22.32.50:3389 --to bore.pub --port 25854
+          .\bore.exe local 82.22.32.50:3389 --to bore.pub --port 25854
