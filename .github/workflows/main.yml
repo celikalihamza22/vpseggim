@@ -1,24 +1,30 @@
-name: RDP → bore.pub (SSH’siz, şifresiz, tek tık)
+name: Mangoo RDP → bore.pub:25860
 
 on: workflow_dispatch
 
 jobs:
-  rdp:
-    runs-on: windows-latest
+  tunnel:
+    runs-on: ubuntu-latest
     steps:
-      - name: Bore Windows exe indir
-        shell: pwsh
-        run: |
-          iwr https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-pc-windows-msvc.zip -OutFile bore.zip
-          Expand-Archive bore.zip -Force
-          Get-ChildItem -Recurse bore.exe | Select -First 1 | Move-Item -Destination bore.exe -Force
-
-      - name: Bore server modunu başlat (senin VPS’ne gerek yok!)
-        shell: pwsh
-        run: |
-          Write-Host ""
-          Write-Host "════════════════════════════════════════"
-          Write-Host "BAĞLANTI 10 SANİYE İÇİNDE GELECEK ↓↓↓"
-          Write-Host "════════════════════════════════════════"
-          Write-Host ""
-          .\bore.exe server --port 25854
+      - name: Bore tünelini VPS'te başlat
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 82.22.32.50
+          username: root
+          password: Ali13481
+          port: 22
+          script: |
+            pkill -f bore || true
+            cd /root
+            wget -q https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
+            tar xzf bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz
+            chmod +x bore
+            nohup ./bore local 3389 --to bore.pub --port 25860 > bore.log 2>&1 &
+            sleep 6
+            echo ""
+            echo "════════════════════════════════════════"
+            echo "RDP CANLI → bore.pub:25860"
+            echo "Kullanıcı   → Administrator (veya senin Windows kullanıcı adın)"
+            echo "Şifre       → Mangoo panelindeki Windows şifren"
+            echo "════════════════════════════════════════"
+            tail -8 bore.log
